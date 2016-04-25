@@ -1,45 +1,49 @@
 from replaceExpand import *
 from collections import defaultdict
 
+#loadDictionary loads various dictionaries involving, emoticons, acronyms, stop-words
+
 def loadDictionary():
-    """create emoticons dictionary"""
-    f=open(".//code//emoticonsWithPolarity.txt",'r')
-    data=f.read().split('\n')
-    emoticonsDict={}
-    for i in data:
-        if i:
-            i=i.split()
-            value=i[-1]
-            key=i[:-1]
-            for j in key:
-                emoticonsDict[j]=value
-    f.close()
+    #Creates emoticons dictionary
 
-    #print emoticonsDict
+    text = open(".//code//emoticonsWithPolarity.txt",'r')
+    textNSeparated = text.read().split('\n')
+    emoticonsDictionary = {}
 
-    """create acronym dictionary"""
-    f=open(".//code//acronym_tokenised.txt",'r')
-    data=f.read().split('\n')
-    acronymDict={}
-    for i in data:
-        if i:
-            i=i.split('\t')
-            word=i[0].split()
-            token=i[1].split()[1:]
-            key=word[0].lower().strip(specialChar)
-            value=[j.lower().strip(specialChar) for j in word[1:]]
-            acronymDict[key]=[value,token]
-    f.close()
+    for _ in textNSeparated:
+        if _:
+            _ = _.split()
+            value = _[-1]
+            key = _[:-1]
+            for __ in key:
+                emoticonsDictionary[__] = value
+    text.close()
 
-    #print acronymDict
+    #Creates acronym dictionary
 
-    """create stopWords dictionary"""
-    stopWords=defaultdict(int)
-    f=open(".//code//stopWords.txt", "r")
-    for line in f:
-        if line:
-            line=line.strip(specialChar).lower()
-            stopWords[line]=1
-    f.close()
+    text = open(".//code//acronym_tokenised.txt",'r')
+    textNSeparated = text.read().split('\n')
+    acronymDictionary = {}
 
-    return acronymDict,stopWords,emoticonsDict
+    for _ in data:
+        if _:
+            _ = _.split('\t')
+            word = _[0].split()
+            token = _[1].split()[1:]
+            key = word[0].lower().strip(specialChar)
+            value = [__.lower().strip(specialChar) for __ in word[1:]]
+            acronymDictionary[key] = [value,token]
+    text.close()
+
+    #Loads stopwords 
+
+    text = open(".//code//stopWords.txt", "r")
+    stopWords = defaultdict(int)
+    
+    for _ in text:
+        if _:
+            _ = _.strip(specialChar).lower()
+            stopWords[_]=1
+    text.close()
+
+    return acronymDictonary, stopWords, emoticonsDictionary
