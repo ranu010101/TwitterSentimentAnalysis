@@ -1,4 +1,3 @@
-"""This code extracts the features and returns the features"""
 from featureExtractor import *
 from probablityModel import *
 import sys
@@ -8,158 +7,149 @@ from collections import defaultdict
 from svmutil import *
 
 if __name__ == '__main__':
-    
-    """check arguments"""
     if len(sys.argv)!= 3:                                                   
         print "Usage :: python main.py ../dataset/finalTrainingInput.txt ../dataset/finalTestingInput"
         sys.exit(0)
+    acronym_dict,stop_words,emoticons_dict = loadDictionary()
 
-    acronymDict,stopWords,emoticonsDict = loadDictionary()
-
-    priorScore=dict(map(lambda (k,v): (frozenset(reduce( lambda x,y:x+y,[[i] if i not in acronymDict else acronymDict[i][0] for i in k.split()])),int(v)),[ line.split('\t') for line in open(".//code//AFINN-111.txt") ]))
+    prior_score=dict(map(lambda (k,v): (frozenset(reduce( lambda x,y:x+y,[[i] if i not in acronym_dict else acronym_dict[i][0] for i in k.split()])),int(v)),[ line.split('\t') for line in open(".//code//AFINN-111.txt") ]))
     
-    """create Unigram Model"""
-    print "Creating Unigram Model......."
-    uniModel=[]
-    f=open('.//code//unigram.txt','r')
-    for line in f:
+    #First, unigram model is created
+    print "Unigram Model is being created"
+    uni_model=[]
+    file=open('.//code//unigram.txt','r')
+    for line in file:
         if line:
             line=line.strip('\r\t\n ')
-            uniModel.append(line)
-    uniModel.sort()
+            uni_model.append(line)
+    uni_model.sort()
 
-    print "Unigram Model Created"
+    print "Unigram Model has been created"
 
-    print "Creating Bigram Model......."
-    biModel=[]
-    f=open('.//code//bigram.txt','r')
-    for line in f:
+    print "Bigram Model is being created"
+    bi_model=[]
+    file=open('.//code//bigram.txt','r')
+    for line in file:
         if line:
             line=line.strip('\r\t\n ')
-            biModel.append(line)
-    biModel.sort()
-    print "Bigram Model Created"
+            bi_model.append(line)
+    bi_model.sort()
+    print "Bigram Model has been created"
 
-    print "Creating Trigram Model......."
-    triModel=[]
-    f=open('.//code//trigram.txt','r')
-    for line in f:
+    print "Trigram Model is being created"
+    tri_model=[]
+    file=open('.//code//trigram.txt','r')
+    for line in file:
         if line:
             line=line.strip('\r\t\n ')
-            triModel.append(line)
-    triModel.sort()
-    print "Trigram Model Created"
-    
-    """ polarity dictionary combines prior score """
-    polarityDictionary = probTraining(priorScore)
-
-    
-    """Create a feature vector of training set """
-    print "Creating Feature Vectors....."
-
+            tri_model.append(line)
+    tri_model.sort()
+    print "Trigram Model has been created"
+    #polarity dictionary combines prior score
+    polarity_dictionary = probTraining(prior_score)
+    #Create a feature vector of training set
+    print "Feature Vectors are being created"
     encode={'positive': 1.0,'negative': 2.0,'neutral':3.0}
-    trainingLabel=[]
+    training_label=[]
     f=open(sys.argv[1],'r')
-    featureVectorsTrain=[]
+    feature_vector_train=[]
     for i in f:
         if i:
             i=i.split('\t')
-            tweet=i[1].split()
-            token=i[2].split()
+            _tweet=i[1].split()
+            _token=i[2].split()
             label=i[3].strip()
-            if tweet:
+            if _tweet:
                 vector=[]
-                trainingLabel.append(encode[label])
-                vector,polarityDictionary=findFeatures(tweet, token, polarityDictionary, stopWords, emoticonsDict, acronymDict)
-                uniVector=[0]*len(uniModel)
-                for i in tweet:
+                training_label.append(encode[label])
+                vector,polarity_dictionary=findFeatures(_tweet, _token, polarity_dictionary, stop_words, emoticons_dict, acronym_dict)
+                uni_vector=[0]*len(uni_model)
+                for i in _tweet:
                     word=i.strip(specialChar).lower()
                     if word:
-                        if word in uniModel:
-                            ind=uniModel.index(word)
-                            uniVector[ind]=1
-                vector=vector+uniVector
+                        if word in uni_model:
+                            ind=uni_model.index(word)
+                            uni_vector[ind]=1
+                vector=vector+uni_vector
 
-                biVector=[0]*len(biModel)
-                tweet=[i.strip(specialChar).lower() for i in tweet]
-                tweet=[i for i in tweet if i]
-                for i in range(len(tweet)-1):
-                    phrase=tweet[i]+' '+tweet[i+1]
-                    if word in biModel:
-                        ind=biModel.index(phrase)
-                        biVector[ind]=1
-                vector=vector+biVector
+                bi_vector=[0]*len(bi_model)
+                _tweet=[i.strip(specialChar).lower() for i in _tweet]
+                _tweet=[i for i in _tweet if i]
+                for i in range(len(_tweet)-1):
+                    phrase=_tweet[i]+' '+_tweet[i+1]
+                    if word in bi_model:
+                        ind=bi_model.index(phrase)
+                        bi_vector[ind]=1
+                vector=vector+bi_vector
 
-                triVector=[0]*len(triModel)
-                tweet=[i.strip(specialChar).lower() for i in tweet]
-                tweet=[i for i in tweet if i]
-                for i in range(len(tweet)-2):
-                    phrase=tweet[i]+' '+tweet[i+1]+' '+tweet[i+2]
-                    if word in triModel:
-                        ind=triModel.index(phrase)
-                        triVector[ind]=1
-                vector=vector+triVector
-                featureVectorsTrain.append(vector)
+                tri_vector=[0]*len(tri_model)
+                _tweet=[i.strip(specialChar).lower() for i in _tweet]
+                _tweet=[i for i in _tweet if i]
+                for i in range(len(_tweet)-2):
+                    phrase=_tweet[i]+' '+_tweet[i+1]+' '+_tweet[i+2]
+                    if word in tri_model:
+                        ind=tri_model.index(phrase)
+                        tri_vector[ind]=1
+                vector=vector+tri_vector
+                feature_vector_train.append(vector)
     f.close()
-    print "Feature Vectors Train Created....."
+    print "Feature Vectors Train Created"
     
-    """for each new tweet create a feature vector and feed it to above model to get label"""
+    #for each new _tweet create a feature vector and feed it to above model to get label
     
-    testingLabel=[]
+    testing_label=[]
     data=[]
     data1=[]
     f=open(sys.argv[2],'r')
-    featureVectorsTest=[]
+    feature_vectots_test=[]
     for i in f:
         if i:
             i=i.split('\t')
-            tweet=i[1].split()
-            token=i[2].split()
+            _tweet=i[1].split()
+            _token=i[2].split()
             label=i[3].strip()
-            if tweet:
+            if _tweet:
                 data.append(label)
-                testingLabel.append(encode[label])
+                testing_label.append(encode[label])
                 vector=[]
-                vector,polarityDictionary=findFeatures(tweet, token, polarityDictionary, stopWords, emoticonsDict, acronymDict)
+                vector,polarity_dictionary=findFeatures(_tweet, _token, polarity_dictionary, stop_words, emoticons_dict, acronym_dict)
 
-                uniVector=[0]*len(uniModel)
-                for i in tweet:
+                uni_vector=[0]*len(uni_model)
+                for i in _tweet:
                     word=i.strip(specialChar).lower()
                     if word:
-                        if word in uniModel:
-                            ind=uniModel.index(word)
-                            uniVector[ind]=1
-                vector=vector+uniVector
+                        if word in uni_model:
+                            ind=uni_model.index(word)
+                            uni_vector[ind]=1
+                vector=vector+uni_vector
 
-                biVector=[0]*len(biModel)
-                tweet=[i.strip(specialChar).lower() for i in tweet]
-                tweet=[i for i in tweet if i]
-                for i in range(len(tweet)-1):
-                    phrase=tweet[i]+' '+tweet[i+1]
-                    if word in biModel:
-                        ind=biModel.index(phrase)
-                        biVector[ind]=1
-                vector=vector+biVector
+                bi_vector=[0]*len(bi_model)
+                _tweet=[i.strip(specialChar).lower() for i in _tweet]
+                _tweet=[i for i in _tweet if i]
+                for i in range(len(_tweet)-1):
+                    phrase=_tweet[i]+' '+_tweet[i+1]
+                    if word in bi_model:
+                        ind=bi_model.index(phrase)
+                        bi_vector[ind]=1
+                vector=vector+bi_vector
 
-                triVector=[0]*len(triModel)
-                tweet=[i.strip(specialChar).lower() for i in tweet]
-                tweet=[i for i in tweet if i]
+                tri_vector=[0]*len(tri_model)
+                _tweet=[i.strip(specialChar).lower() for i in _tweet]
+                _tweet=[i for i in _tweet if i]
 
-                for i in range(len(tweet)-2):
-                    phrase=tweet[i]+' '+tweet[i+1]+' '+tweet[i+2]
-                    if word in triModel:
-                        ind=triModel.index(phrase)
-                        triVector[ind]=1
-                vector=vector+triVector
-                featureVectorsTest.append(vector)
+                for i in range(len(_tweet)-2):
+                    phrase=_tweet[i]+' '+_tweet[i+1]+' '+_tweet[i+2]
+                    if word in tri_model:
+                        ind=tri_model.index(phrase)
+                        tri_vector[ind]=1
+                vector=vector+tri_vector
+                feature_vectots_test.append(vector)
     f.close()
-    print "Feature Vectors of test input created. Calculating Accuracy..."
-
-    predictedLabel = svmClassifier(trainingLabel,testingLabel,featureVectorsTrain,featureVectorsTest)
-
-    for i in range(len(predictedLabel)):
-        givenLabel = predictedLabel[i]
-        label = encode.keys()[encode.values().index(givenLabel)]
+    print "Feature Vectors of test input created. Accuracy is being calculated..."
+    predicted_label = svmClassifier(training_label,testing_label,feature_vector_train,feature_vectots_test)
+    for i in range(len(predicted_label)):
+        given_label = predicted_label[i]
+        label = encode.keys()[encode.values().index(given_label)]
         data1.append(label)
 
     f=open('./code/taskB.gs','w')
@@ -169,4 +159,3 @@ if __name__ == '__main__':
     f=open('./code/taskB.pred','w')
     f.write('\n'.join(data1))
     f.close()
-    
