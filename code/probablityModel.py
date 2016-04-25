@@ -2,25 +2,25 @@ from replaceExpand import *
 from senti_classifier import senti_classifier
 
 
-def probTraining(priorScore):
+def probTraining(prevScore):
 
-    """trainFile is a file which contain the traind data is following format
-    tokenizedTweet\tpos\tlabel\n it return the dictonary comtaining the prob of word being positive, negative, neutral"""
+    #Training file contains trained data in X, in format tweet\t pos \t label \n.
+    #It returns the dictonary comtaining the probability of word being positive, negative or neutral.
 
-    wordProb={}
-    tweetCount=[0,0,0,0]
-    for i in priorScore.keys():
+    wordProbabilityability = {}
+    tweetCount = [0,0,0,0]
+    for i in prevScore.keys():
         if i:
-            wordProb[i]=[0.0,0.0,0.0]
-            posScore, negScore = senti_classifier.polarity_scores(list(i))
-            if priorScore[i]>0.0:
-                wordProb[i][positive]=priorScore[i]/5.0
-                wordProb[i][negative]=negScore
-            elif priorScore[i]<0.0:
-                wordProb[i][negative]=-(priorScore[i]/5.0)
-                wordProb[i][positive]=posScore
+            wordProbability[i] = [0.0,0.0,0.0]
+            positiveScore, negativeScore = senti_classifier.polarity_scores(list(i))
+            if prevScore[i]>0.0:
+                wordProbability[i][positive]=prevScore[i]/5.0
+                wordProbability[i][negative]=negativeScore
+            elif prevScore[i]<0.0:
+                wordProbability[i][negative]=-(prevScore[i]/5.0)
+                wordProbability[i][positive]=positiveScore
             else:
-                wordProb[i][positive]=posScore
-                wordProb[i][negative]=negScore
+                wordProbability[i][positive]=positiveScore
+                wordProbability[i][negative]=negativeScore
                 
-    return wordProb
+    return wordProbability
