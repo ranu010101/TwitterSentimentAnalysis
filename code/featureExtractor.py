@@ -2,174 +2,198 @@ from senti_classifier import senti_classifier
 from replaceExpand import *
 from nltk.corpus import wordnet
 
-def calculateScore(tweet, polarityDictionary):
+#calculateScore obtains score for a given tweet using dictionary for polarity
+
+def calculateScore(tweet, pDict): #pDict represents polarity dictionary
     score = {}
-    tweet=[i.lower().strip(specialChar) for i in tweet]
-    tweet=[i for i in tweet if i]
-    length=len(tweet)
-    init=0
-    neutralScore=0
-    while init<length:
-        for i in range(init,length):
-            flag=0
-            for j in range(length,i,-1):
-                phrase=frozenset(tweet[i:j])
-                if phrase in polarityDictionary:
-                    init=j
-                    flag=1
-                    posScore = polarityDictionary[phrase][positive]
-                    negScore = polarityDictionary[phrase][negative]
-                    neutralScore = polarityDictionary[phrase][neutral]
-                    score[phrase]=[posScore, negScore, neutralScore]
+    tweet = [_.lower().strip(specialChar) for _ in tweet]
+    tweet = [_ for _ in tweet if _]
+    tweetLength = len(tweet)
+    init = 0
+    neutralScore = 0
+    while init<tweetLength:
+        for _ in range(init,tweetLength):
+            flag = 0
+            for __ in range(tweetLength,_,-1):
+                phrase = frozenset(tweet[_:__])
+                if phrase in pDict:
+                    init = __
+                    flag = 1
+                    positiveScore = pDict[phrase][positive]
+                    negativeScore = pDict[phrase][negative]
+                    neutralScore = pDict[phrase][neutral]
+                    score[phrase]=[positiveScore, negativeScore, neutralScore]
                     break
             if flag==1:
                 break
             else:
-                posScore, negScore = senti_classifier.polarity_scores([tweet[i]])
-                score[frozenset([tweet[i]])]=[posScore, negScore, neutralScore]
-                polarityDictionary[frozenset([tweet[i]])]=[posScore, negScore, neutralScore]
-    return score,polarityDictionary
+                positiveScore, negativeScore = senti_classifier.polarity_scores([tweet[_]])
+                score[frozenset([tweet[_]])]=[positiveScore, negativeScore, neutralScore]
+                pDict[frozenset([tweet[_]])]=[positiveScore, negativeScore, neutralScore]
+    return score,pDict
+
+#findCapitalised finds capitals in a tweet
 
 def findCapitalised(tweet, token, score):
-    count=0
-    countCap = 0
-    countCapPos = 0
-    countCapNeg = 0
+    count = 0
+    countCapitals = 0
+    countCapitalPositives = 0
+    countCapitalNegatives = 0
     isCapitalised = 0
-    for i in range(len(tweet)):
-        if token[i]!='$':
-            word=tweet[i].strip(specialChar)
+    for _ in range(len(tweet)):
+        if token[_]!='$':
+            word = tweet[_].strip(specialChar)
             if word:
-                count+=1
+                count = count + 1
                 if word.isupper():
-                    countCap += 1
+                    countCapitals = countCapitals + 1
                     word=frozenset([word.lower()])
                     for phrase in score.keys():
                         if word.issubset(phrase):
                                 if score[phrase][positive]!=0.0:
-                                    countCapPos +=1
+                                    countCapitalPositives +=1
                                 if score[phrase][negative]!=0.0:
-                                    countCapNeg +=1
+                                    countCapitalNegatives +=1
     percentageCapitalised = 0.0
     if count>0:
-        percentageCapitalised = float(countCap)/count
+        percentageCapitalised = float(countCapitals)/count
     if percentageCapitalised!=0.0:
 	    isCapitalised=1
-    return [ percentageCapitalised, countCapPos, countCapNeg ,isCapitalised ]
+    return [ percentageCapitalised, countCapitalPositives, countCapitalNegatives ,isCapitalised ]
+
+#findNegation finds negations in a tweet
 
 def findNegation(tweet):
-	countNegation = 0
-	for i in range(len(tweet)):
-		if tweet[i]=='negation':
-			countNegation+=1
-	return [countNegation]
+	negCount = 0
+	for _ in range(len(tweet)):
+		if tweet[_] == 'negation': #compares against negations
+			negCount+=1
+	return [negCount]
+
+#findTotalScore computes total score
 
 def findTotalScore(score):
     totalScore = 0
-    for i in score.values():
-        totalScore += (i[positive] - i[negative])
+    for _ in score.values():
+        totalScore += (_[positive] - _[negative])
     return [ totalScore ]
 
+#findPositiveNegativeWords finds total number of positive and negative words
+
 def findPositiveNegativeWords(tweet, token, score):
-    countPos=0
-    countNeg=0
+    countPositive=0
+    countNegative=0
     count=0
     totalScore = 0
     if tweet:
-        for i in range(len(tweet)):
-            if token[i] not in listSpecialTag:
-                word=frozenset([tweet[i].lower().strip(specialChar)])
+        for _ in range(len(tweet)):
+            if token[_] not in listSpecialTag:
+                word=frozenset([tweet[_].lower().strip(specialChar)])
                 if word:
                     count+=1
                     for phrase in score.keys():
                         if word.issubset(phrase):
                             if score[phrase][positive]!=0.0:
-	                            countPos+=1
+	                            countPositive+=1
                             if score[phrase][negative]!=0.0:
-                                countNeg+=1
+                                countNegative+=1
                             totalScore += (score[phrase][positive] - score[phrase][negative])
-    return [ countPos, countNeg, totalScore ]
+    return [ countPositive, countNegative, totalScore ]
+
+#findEmoticons filters emoticons from tweet
 
 def findEmoticons(tweet, token):
-	countEmoPos = 0
-	countEmoNeg =0
-	countEmoExtremePos = 0
-	countEmoExtremeENeg = 0
+	countEmoPostive = 0
+	countEmoNegative =0
+	countEmoExtremePostive = 0
+	countEmoExtremeNegative = 0
 
-	for i in range(len(tweet)):
-	    if token[i] ==  'E':
-			if tweet[i] == 'Extremely-Positive':
-				countEmoExtremePos+=1
-			if tweet[i] == 'Extremely-Negative':
-				countEmoExtremeENeg+=1
-			if tweet[i] == 'Positive':
-				countEmoPos+=1
-			if tweet[i] == 'Negative':
-				countEmoNeg+=1
+	for _ in range(len(tweet)):
+	    if token[_] ==  'E':
+			if tweet[_] == 'Extremely-Postive':
+				countEmoExtremePostive+=1
+			if tweet[_] == 'Extremely-Negative':
+				countEmoExtremeNegative+=1
+			if tweet[_] == 'Postive':
+				countEmoPostive+=1
+			if tweet[_] == 'Negative':
+				countEmoNegative+=1
 
-	return [ countEmoPos, countEmoNeg, countEmoExtremePos, countEmoExtremeENeg ]
+	return [ countEmoPostive, countEmoNegative, countEmoExtremePostive, countEmoExtremeNegative ]
+
+#findHashtag finds hashtags in a tweet
 
 def findHashtag( tweet, token, score):
 	
-    countHashPos=0
-    countHashNeg=0
+    countHashPostive=0
+    countHashNegative=0
     count=0
-    for i in range(len(tweet)):
-        if token[i]=='#' :
+    for _ in range(len(tweet)):
+        if token[_]=='#' :
             count+=1
-            word=frozenset([tweet[i].lower().strip(specialChar)])
+            word=frozenset([tweet[_].lower().strip(specialChar)])
             if word:
                 for phrase in score.keys():
                     if word.issubset(phrase):
                         if score[phrase][positive]!=0.0:
-                            countHashPos+=1
+                            countHashPostive+=1
                         if score[phrase][negative]!=0.0:
-                            countHashNeg+=1
+                            countHashNegative+=1
                         break
-    return [ countHashPos, countHashNeg ]
+    return [ countHashPostive, countHashNegative ]
+
+#countSpecialChar finds special chars in a tweet
 
 def countSpecialChar(tweet,score):
-    count={'?':0,'!':0,'*':0}
-    for i in range(len(tweet)):
-        word=tweet[i].lower().strip(specialChar)
+    listSpecialChars={'?':0,'!':0,'*':0}
+    for _ in range(len(tweet)):
+        word=tweet[_].lower().strip(specialChar)
         if word:
-            count['?']+=word.count('?')
-            count['!']+=word.count('!')
-            count['*']+=word.count('*')
-    return [ count['?'], count['!'], count['*'] ]
+            listSpecialChars['?']+=word.listSpecialChars('?')
+            listSpecialChars['!']+=word.listSpecialChars('!')
+            listSpecialChars['*']+=word.listSpecialChars('*')
+    return [ listSpecialChars['?'], listSpecialChars['!'], listSpecialChars['*'] ]
+
+#countPosTag counts POS tags in a tweet
 
 def countPosTag(tweet,token,score):
-    count={'N':0,'V':0,'R':0,'P':0,'O':0,'A':0}
-    for i in range(len(tweet)):
-        word=tweet[i].lower().strip(specialChar)
+    POStagList = {'N':0,'V':0,'R':0,'P':0,'O':0,'A':0}
+    for _ in range(len(tweet)):
+        word=tweet[_].lower().strip(specialChar)
         if word:
-            if token[i] in count:
-                count[token[i]]+=1
+            if token[_] in POStagList:
+                POStagList[token[_]]+=1
 
-    return [ count['N'], count['V'], count['R'], count['P'], count['O'], count['A'] ]
+    return [ POStagList['N'], POStagList['V'], POStagList['R'], POStagList['P'], POStagList['O'], POStagList['A'] ]
+
+#findUrl counts URLs in a tweet
 
 def findUrl(tweet,token):
     count = 0
-    for i in range(len(tweet)):
-        if token[i] ==  'U':
+    for _ in range(len(tweet)):
+        if token[_] ==  'U':
             count+=1
     return [count]
 
+#findFeatures takes tweet as input and token, then returns the feature vector
 
+def findFeatures(tweet, token, pDict, stopWords, emoticonsDict, acronymDict):
 
-def findFeatures(tweet, token, polarityDictionary, stopWords, emoticonsDict, acronymDict):
-    """takes as input the tweet and token and returns the feature vector"""
+    tweet,token,i,j = preprocesingTweet1(tweet, token, emoticonsDict, acronymDict) 
+    score,pDict = calculateScore(tweet, pDict)
 
-    tweet,token,count1,count2 = preprocesingTweet1(tweet, token, emoticonsDict, acronymDict) 
-    score,polarityDictionary = calculateScore(tweet, polarityDictionary)
-    featureVector=[]
-    featureVector.extend(findTotalScore(score))
+    #Initializing feature vector
+    fVector=[] 
+    fVector.extend(findTotalScore(score))
     tweet,token=preprocesingTweet2(tweet, token, stopWords)
-    featureVector.extend(findCapitalised( tweet, token, score))
-    featureVector.extend(findHashtag( tweet, token, score))
-    featureVector.extend(findEmoticons(tweet, token))
-    featureVector.extend(findNegation(tweet))
-    featureVector.extend(findPositiveNegativeWords(tweet,token, score))
-    featureVector.extend(countSpecialChar(tweet,score))  # number of  special char
-    featureVector.extend(countPosTag(tweet,token,score))
-    return featureVector, polarityDictionary
+    
+    #Adding respective features
+    fVector.extend(findCapitalised( tweet, token, score))
+    fVector.extend(findHashtag( tweet, token, score))
+    fVector.extend(findEmoticons(tweet, token))
+    fVector.extend(findNegation(tweet))
+    fVector.extend(findPositiveNegativeWords(tweet,token, score))
+    fVector.extend(countSpecialChar(tweet,score))  
+    fVector.extend(countPosTag(tweet,token,score))
+
+    return fVector, pDict
