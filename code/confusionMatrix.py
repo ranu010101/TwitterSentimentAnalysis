@@ -1,53 +1,32 @@
 import sys
+pos,neg,neu=0,1,2
 
-positive=0
-negative=1
-neutral=2
-
-
-
-"""
-
-act/pred	positive negative neutral
-
-positive	0 0	 0 1	  0 2
-negative	1 0	 1 1	  1 2
-neutral		2 0 	 2 1	  2 2
-
-"""
 if __name__ == '__main__':
-	"""check arguments"""
 	if len(sys.argv)!= 3:    
-		print "Usage :: python .py actualLabels predictedLabels"
+		print "Usage :: python .py real_labels predicted_labels"
 		sys.exit(0)
-
-	actualFile=open(sys.argv[1],'r')
-	predictedFile=open(sys.argv[2],'r')
-	actualLabels=[]
-	predictedLabels=[]
-	confusionMatrix=[[0,0,0],[0,0,0],[0,0,0]]
-	for i in actualFile:
+	real_file=open(sys.argv[1],'r')
+	predicted_file=open(sys.argv[2],'r')
+	real_labels=[]
+	predicted_labels=[]
+	confMat=[[0,0,0],[0,0,0],[0,0,0]]
+	for i in real_file:
 		i=i.strip('\t\n\r ')
-		actualLabels+=[i]
-
-	for i in predictedFile:
+		real_labels+=[i]
+	for i in predicted_file:
 		i=i.strip('\t\n\r ')
-		predictedLabels+=[i]
-	
-	lenLabels=len(actualLabels)
-
-	for i in range(lenLabels):
-		confusionMatrix[eval(actualLabels[i])][eval(predictedLabels[i])]+=1
+		predicted_labels+=[i]
+	len_labels=len(real_labels)
+	for i in range(len_labels):
+		confMat[eval(real_labels[i])][eval(predicted_labels[i])]+=1
 	print "actual/predicted\tpositive\tnegative\tneutral"
 	print "positive\t\t",
-	for i in confusionMatrix[positive]:
+	for i in confMat[pos]:
 			print str(i)+'\t\t',
 	print "\nnegative\t\t",
-	for i in confusionMatrix[negative]:
+	for i in confMat[neg]:
 			print str(i)+'\t\t',
 	print "\nneutral\t\t\t",
-	for i in confusionMatrix[neutral]:
+	for i in confMat[neu]:
 			print str(i)+'\t\t',
-
 	print		
-
