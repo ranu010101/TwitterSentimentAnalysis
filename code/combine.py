@@ -1,35 +1,26 @@
-"""This code combines the output of the tokeniser and the input tweet set and returns the final input file in the following format"""
-"""tweet Id, Tweet tokens, POS tokens,label """
-
-
+#This code combines the output of the tokeniser and the input tweet set and returns the final input file in the following format :- tweet Id, Tweet tokens, POS tokens,label
 import sys
 from itertools import izip
-
-
-def main():    
-
-    """check arguments"""
-    if len(sys.argv)!= 4:                                                                               
+def main():
+    #check for the validity of arguments
+    if len(sys.argv)!= 4:
         print "Usage :: python combine.py ../documents-export-2014-03-19/trainingDatasetProcessed.txt ../documents-export-2014-03-19/trainingTokenised.txt ../documents-export-2014-03-19/finalTrainingInput.txt"
-        #print "Usage :: python combine.py ../documents-export-2014-03-19/testingDatasetProcessed.txt ../documents-export-2014-03-19/testingTokenised.txt ../documents-export-2014-03-19/finalTestingInput.txt"
         sys.exit(0)
-
-    """Parallely combine both the files"""
-    data=[]
-    f1=open(sys.argv[1],'r')
-    f2=open(sys.argv[2],'r')
-    for line1, line2 in izip(f1, f2):
-        words1 = line1.strip().split('\t')
-        words2 = line2.strip().split('\t')
-        string = words1[0]+'\t'+words2[0]+'\t'+words2[1]+'\t'+words1[2]+'\n'
-        data.append(string)
-    f1.close()
-    f2.close()
-
-    """write into file"""
+    #Parallely combine both the files
+    arr=[]
+    #read from the files
+    file1=open(sys.argv[1],'r')
+    file2=open(sys.argv[2],'r')
+    for l1, l2 in izip(file1, file2):
+        w1 = l1.strip().split('\t') #tab separated
+        w2 = l2.strip().split('\t')
+        st = w1[0]+'\t'+w2[0]+'\t'+w2[1]+'\t'+w1[2]+'\n'
+        arr.append(st)
+    file1.close()
+    file2.close()
+    #write this to file
     f=open(sys.argv[3],'w')
-    f.write("".join(data))
+    f.write("".join(arr))
     f.close()
-
-if __name__ == "__main__":                                                                               #main
+if __name__ == "__main__":
     main()
