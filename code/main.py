@@ -6,8 +6,6 @@ from classifier import *
 from prepare import *
 from collections import defaultdict
 from svmutil import *
-#from sklearn import naive_bayes
-#from sklearn.externals import joblib
 
 if __name__ == '__main__':
     
@@ -55,16 +53,6 @@ if __name__ == '__main__':
     """ polarity dictionary combines prior score """
     polarityDictionary = probTraining(priorScore)
 
-
-    """write the polarityDictionary"""
-    """
-    data=[]
-    for key in polarityDictionary:
-        data.append(key+'\t'+str(polarityDictionary[key][positive])+'\t'+str(polarityDictionary[key][negative])+'\t'+str(polarityDictionary[key][neutral]))
-    f=open('polarityDictionary.txt','w')
-    f.write('\n'.join(data))
-    f.close()
-    """
     
     """Create a feature vector of training set """
     print "Creating Feature Vectors....."
@@ -111,8 +99,6 @@ if __name__ == '__main__':
                         ind=triModel.index(phrase)
                         triVector[ind]=1
                 vector=vector+triVector
-
-#                print vector
                 featureVectorsTrain.append(vector)
     f.close()
     print "Feature Vectors Train Created....."
@@ -184,10 +170,3 @@ if __name__ == '__main__':
     f.write('\n'.join(data1))
     f.close()
     
-    #print len(featureVectorsTest)
-    #print len(testingLabel)
-    #print len(featureVectorsTrain)
-    #print len(trainingLabel)
-
-    #svmClassifier(trainingLabel,testingLabel,featureVectorsTrain,featureVectorsTest)
-    #naiveBayesClassifier(trainingLabel,testingLabel,featureVectorsTrain,featureVectorsTest)

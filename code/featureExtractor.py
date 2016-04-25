@@ -2,9 +2,6 @@ from senti_classifier import senti_classifier
 from replaceExpand import *
 from nltk.corpus import wordnet
 
-#syns = wordnet.synsets('car')
-#synonyms = [l.name for s in syns for l in s.lemmas]
-
 def calculateScore(tweet, polarityDictionary):
     score = {}
     tweet=[i.lower().strip(specialChar) for i in tweet]
@@ -33,9 +30,6 @@ def calculateScore(tweet, polarityDictionary):
                 polarityDictionary[frozenset([tweet[i]])]=[posScore, negScore, neutralScore]
     return score,polarityDictionary
 
-
-
-
 def findCapitalised(tweet, token, score):
     count=0
     countCap = 0
@@ -62,10 +56,6 @@ def findCapitalised(tweet, token, score):
     if percentageCapitalised!=0.0:
 	    isCapitalised=1
     return [ percentageCapitalised, countCapPos, countCapNeg ,isCapitalised ]
-#    return [ percentageCapitalised, isCapitalised ]
-
-
-
 
 def findNegation(tweet):
 	countNegation = 0
@@ -74,17 +64,11 @@ def findNegation(tweet):
 			countNegation+=1
 	return [countNegation]
 
-
-
-
 def findTotalScore(score):
     totalScore = 0
     for i in score.values():
         totalScore += (i[positive] - i[negative])
     return [ totalScore ]
-
-
-
 
 def findPositiveNegativeWords(tweet, token, score):
     countPos=0
@@ -105,10 +89,6 @@ def findPositiveNegativeWords(tweet, token, score):
                                 countNeg+=1
                             totalScore += (score[phrase][positive] - score[phrase][negative])
     return [ countPos, countNeg, totalScore ]
-#	return [ count ]
-	
-
-
 
 def findEmoticons(tweet, token):
 	countEmoPos = 0
@@ -129,9 +109,6 @@ def findEmoticons(tweet, token):
 
 	return [ countEmoPos, countEmoNeg, countEmoExtremePos, countEmoExtremeENeg ]
 
-
-
-
 def findHashtag( tweet, token, score):
 	
     countHashPos=0
@@ -150,65 +127,26 @@ def findHashtag( tweet, token, score):
                             countHashNeg+=1
                         break
     return [ countHashPos, countHashNeg ]
-#    return [ count ]
-
-
-
 
 def countSpecialChar(tweet,score):
     count={'?':0,'!':0,'*':0}
-#    count={'?':[0,0],'!':[0,0],'*':[0,0]}
     for i in range(len(tweet)):
         word=tweet[i].lower().strip(specialChar)
-#        word=frozenset([tweet[i].lower().strip(specialChar)])
         if word:
             count['?']+=word.count('?')
             count['!']+=word.count('!')
             count['*']+=word.count('*')
-            """
-            for phrase in score.keys():
-                if word.issubset(phrase):
-                    word=''.join(list(word))
-                    if score[phrase][positive]!=0.0:
-                        count['?'][positive]+=word.count('?')
-                        count['!'][positive]+=word.count('!')
-                        count['*'][positive]+=word.count('*')
-                    if score[phrase][negative]!=0.0:
-                        count['?'][negative]+=word.count('?')
-                        count['!'][negative]+=word.count('!')
-                        count['*'][negative]+=word.count('*')
-                    break
-            """
     return [ count['?'], count['!'], count['*'] ]
-#    return [ count['?'][positive], count['!'][positive], count['*'][positive], count['?'][negative], count['!'][negative], count['*'][negative] ]
-
-
-
 
 def countPosTag(tweet,token,score):
     count={'N':0,'V':0,'R':0,'P':0,'O':0,'A':0}
-#    count={'N':[0,0],'V':[0,0],'R':[0,0],'P':[0,0],'O':[0,0],'A':[0,0]}
     for i in range(len(tweet)):
         word=tweet[i].lower().strip(specialChar)
-#        word=frozenset([tweet[i].lower().strip(specialChar)])
         if word:
             if token[i] in count:
                 count[token[i]]+=1
-            """           
-            for phrase in score.keys():
-                if word.issubset(phrase):
-                    word=''.join(list(word))
-                    if score[phrase][positive]!=0.0:
-                        if token[i] in count:
-                            count[token[i]][positive]+=1
-                    if score[phrase][negative]!=0.0:
-                        if token[i] in count:
-                            count[token[i]][negative]+=1
-                    break
-            """
 
     return [ count['N'], count['V'], count['R'], count['P'], count['O'], count['A'] ]
-#    return [ count['N'][positive], count['V'][positive], count['R'][positive], count['P'][positive], count['O'][positive], count['A'][positive], count['N'][negative], count['V'][negative], count['R'][negative], count['P'][negative], count['O'][negative], count['A'][negative] ]
 
 def findUrl(tweet,token):
     count = 0
@@ -232,9 +170,6 @@ def findFeatures(tweet, token, polarityDictionary, stopWords, emoticonsDict, acr
     featureVector.extend(findEmoticons(tweet, token))
     featureVector.extend(findNegation(tweet))
     featureVector.extend(findPositiveNegativeWords(tweet,token, score))
-   # #featureVector.extend(findUrl(tweet,token))
-#   # featureVector.extend([count1])  # number of acronym
-#    #featureVector.extend([count2])  # number of words which had repetion
     featureVector.extend(countSpecialChar(tweet,score))  # number of  special char
     featureVector.extend(countPosTag(tweet,token,score))
     return featureVector, polarityDictionary
