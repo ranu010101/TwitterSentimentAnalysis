@@ -1,17 +1,21 @@
 from svmutil import *
 
-def svmClassifier(trainingLabel,testingLabel,featureVectorsTrain,featureVectorsTest):
+# trLab:training label, teLab:testing label, feVeTr: feature vectors for training, feVeTe: feature vectors for testing
+
+def svmClassifier(trLab,teLab,feVeTr,feVeTe):
     
-    """Feed the feature vector to svm to create model"""
+    #Feed the feature vector to svm to create model
     print "Creating SVM Model"
-    model= svm_train(trainingLabel,featureVectorsTrain)
-    print "Model created. Saving..."
+    model= svm_train(trLab,feVeTr)
+    print "Model is created. Saving the model."
 
-    """Save model"""
+    #Save model
     svm_save_model('.//code//sentimentAnalysisSVM.model', model)
-    print "Model Saved. Proceed to test..."
+    print "Model is saved. Proceed to test."
 
-    predictedLabel, predictedAcc, predictedValue = svm_predict(testingLabel, featureVectorsTest, model)
+    #prLab:predicted label, predAcc: predicted accuracy/predAcc, predVal:predicted value for accuracy 	
+
+    prLab, predAcc, predVal = svm_predict(teLab, feVeTe, model)
     print "Finished. The accuracy is:"
-    print predictedAcc[0]
-    return predictedLabel
+    print predAcc[0]
+    return prLab
